@@ -49,6 +49,6 @@ public class CurrencyConversionController {
 		CurrencyConversionBean body = exchangeServiceProxy.retrieveExchangeValue(from, to);
 		
 		return new CurrencyConversionBean(1000L, from, to, body.getConversionMultiple(), quantity, quantity.multiply(body.getConversionMultiple()), 
-				Integer.parseInt(env.getProperty("local.server.port")));
+				body.getPort());
 	}
 }
