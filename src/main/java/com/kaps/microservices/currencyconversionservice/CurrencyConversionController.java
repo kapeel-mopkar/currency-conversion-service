@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,8 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class CurrencyConversionController {
+	
+	private static Logger LOGGER = LoggerFactory.getLogger(CurrencyConversionController.class);
 	
 	@Autowired
 	private Environment env;
@@ -31,9 +35,10 @@ public class CurrencyConversionController {
 				CurrencyConversionBean.class, uriVariables);
 		
 		CurrencyConversionBean body = forEntity.getBody();
-		
-		return new CurrencyConversionBean(1000L, from, to, body.getConversionMultiple(), quantity, quantity.multiply(body.getConversionMultiple()), 
+		CurrencyConversionBean responseBean = new CurrencyConversionBean(1000L, from, to, body.getConversionMultiple(), quantity, quantity.multiply(body.getConversionMultiple()), 
 				Integer.parseInt(env.getProperty("local.server.port")));
+		LOGGER.info("/currency-exchange : {}", responseBean);
+		return responseBean;
 	}
 	
 	@GetMapping(path = "/currency-exchange-feign/from/{from}/to/{to}/quantity/{quantity}")
@@ -47,8 +52,9 @@ public class CurrencyConversionController {
 		//		
 		//		CurrencyConversionBean body = forEntity.getBody();
 		CurrencyConversionBean body = exchangeServiceProxy.retrieveExchangeValue(from, to);
-		
-		return new CurrencyConversionBean(1000L, from, to, body.getConversionMultiple(), quantity, quantity.multiply(body.getConversionMultiple()), 
-				body.getPort());
+		CurrencyConversionBean responseBean = new CurrencyConversionBean(1000L, from, to, body.getConversionMultiple(), quantity, quantity.multiply(body.getConversionMultiple()), 
+				Integer.parseInt(env.getProperty("local.server.port")));
+		LOGGER.info("/currency-exchange-feign : {}", responseBean);
+		return responseBean;
 	}
 }
